@@ -76,29 +76,30 @@ async function makeCall(messages) {
     console.log('Making call');
     return new Promise((resolve, reject) => {
         const [numbers, text] = formatMessages(messages);
-        const to = numbers.map(numberEntry => {
-            return {
-                'type': 'phone',
-                'number': numberEntry
-            };
+
+        numbers.forEach(number => {
+            vonage.calls.create({
+                ncco: [
+                    {
+                        'action': 'talk',
+                        'text': 'This song is generated, hope you enjoy it: ' + text + ' goodbye!'
+                    }
+                ],
+                to: [{
+                    'type': 'phone',
+                    'number': number
+                }],
+                from: {
+                    type: 'phone',
+                    number: process.env.VONAGE_NUMBER
+                }
+            }, (error, response) => {
+                if (error) reject(error)
+                if (response) console.log(response)
+            });
         });
 
-        vonage.calls.create({
-            ncco: [
-                {
-                    'action': 'talk',
-                    'text': 'This song is generated, hope you enjoy it: ' + text + ' goodbye!'
-                }
-            ],
-            to: to,
-            from: {
-                type: 'phone',
-                number: process.env.VONAGE_NUMBER
-            }
-        }, (error, response) => {
-            if (error) reject(error)
-            if (response) resolve(response)
-        });
+        resolve("Calls complete");
     });
 }
 
